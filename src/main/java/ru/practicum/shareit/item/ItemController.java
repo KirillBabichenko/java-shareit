@@ -13,12 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
+import static ru.practicum.shareit.user.Variables.ID_SHARER;
 
 @RestController
 @RequestMapping("/items")
@@ -27,13 +24,13 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") Long idUser,
+    public ItemDto createItem(@RequestHeader(ID_SHARER) Long idUser,
                               @Valid @RequestBody ItemDto itemDto) {
         return itemService.createItem(idUser, itemDto);
     }
 
     @PatchMapping("/{id}")
-    public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") Long idUser,
+    public ItemDto updateItem(@RequestHeader(ID_SHARER) Long idUser,
                               @PathVariable Long id,
                               @RequestBody ItemDto itemDto) {
         return itemService.updateItem(idUser, id, itemDto);
@@ -45,15 +42,12 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAllUserItems(@RequestHeader("X-Sharer-User-Id") Long idUser) {
+    public List<ItemDto> getAllUserItems(@RequestHeader(ID_SHARER) Long idUser) {
         return itemService.getAllUserItems(idUser);
     }
 
     @GetMapping("/search")
     public List<ItemDto> findItems(@RequestParam(name = "text") String text) {
-        if (text.isEmpty()) {
-            return new ArrayList<>();
-        }
         return itemService.findItems(text);
     }
 }

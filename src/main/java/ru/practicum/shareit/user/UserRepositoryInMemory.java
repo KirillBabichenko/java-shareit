@@ -53,7 +53,8 @@ public class UserRepositoryInMemory implements UserRepository {
     }
 
     private User emailValidation(User verifiedUser) {
-        if (users.values().stream().anyMatch(user -> user.getEmail().equals(verifiedUser.getEmail()))) {
+        if (users.values().stream()
+                .anyMatch(user -> checkEmails(user, verifiedUser))) {
             throw new MissingValidationException("Пользователь с email = " +
                     verifiedUser.getEmail() + " уже существует");
         } else {
@@ -64,7 +65,7 @@ public class UserRepositoryInMemory implements UserRepository {
     private void emailValidationExceptId(Long id, User verifiedUser) {
         if (users.values().stream()
                 .filter(user -> !user.getId().equals(id))
-                .anyMatch(user -> user.getEmail().equals(verifiedUser.getEmail()))) {
+                .anyMatch(user -> checkEmails(user, verifiedUser))) {
             throw new MissingValidationException("Пользователь с email = " +
                     verifiedUser.getEmail() + " уже существует");
         }
@@ -74,5 +75,9 @@ public class UserRepositoryInMemory implements UserRepository {
         if (!users.containsKey(id)) {
             throw new MissingIdException("Пользователя с таким id нет");
         }
+    }
+
+    private Boolean checkEmails(User user, User verifiedUser) {
+        return user.getEmail().equals(verifiedUser.getEmail());
     }
 }

@@ -8,6 +8,7 @@ import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -50,10 +51,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> findItems(String text) {
-
-        return itemRepository.findItems(text).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+        if (text.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return itemRepository.findItems(text).stream()
+                    .map(ItemMapper::toItemDto)
+                    .collect(Collectors.toList());
+        }
     }
 
     private void checkOwner(Long id, Item item) {
