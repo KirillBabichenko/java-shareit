@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
-import javax.persistence.Column;
 import java.time.LocalDateTime;
 
 /**
