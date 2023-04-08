@@ -25,4 +25,16 @@ public class ErrorHandler {
     public ErrorResponse handleFailedOwnerException(FailedOwnerException exception) {
         return new ErrorResponse(exception.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleRequestFailedException(RequestFailedException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleRequestUnsupportedStatus(UnsupportedStatus exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
 }
