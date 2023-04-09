@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.dto.MapperBooking;
@@ -21,13 +22,17 @@ import static ru.practicum.shareit.booking.dto.MapperBooking.toBooking;
 import static ru.practicum.shareit.booking.dto.MapperBooking.toBookingDto;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
     public final BookingRepository bookingRepository;
     public final UserRepositoryJpa userRepositoryJpa;
     public final ItemRepositoryJpa itemRepositoryJpa;
 
-    //Создание бронирования
+    /**
+     * Создание бронирования
+     */
+    @Transactional
     public BookingDto createBooking(Long idUser, BookingShortDto bookingDto) {
         checkBookingDate(bookingDto);
         User user = checkUser(idUser);
@@ -39,7 +44,10 @@ public class BookingServiceImpl implements BookingService {
         return toBookingDto(bookingRepository.save(booking));
     }
 
-    //Подтверждение бронирования
+    /**
+     * Подтверждение бронирования
+     */
+    @Transactional
     public BookingDto approveBooking(Long idUser, Long idBooking, Boolean approved) {
         Booking booking = bookingRepository.findById(idBooking)
                 .orElseThrow(() -> new MissingIdException("При запросе вещи произошла ошибка"));
@@ -59,7 +67,9 @@ public class BookingServiceImpl implements BookingService {
         return toBookingDto(bookingRepository.save(booking));
     }
 
-    // Получить бронирование по его ID
+    /**
+     * Получить бронирование по его ID
+     */
     public BookingDto getBookingById(Long idUser, Long idBooking) {
         Booking booking = bookingRepository.findById(idBooking)
                 .orElseThrow(() -> new MissingIdException("При запросе вещи произошла ошибка"));
@@ -69,9 +79,12 @@ public class BookingServiceImpl implements BookingService {
                 "Запрашивать бронирование имеет право только владелец вещи или создатель бронирования.");
     }
 
-    // Получить все бронирования для текущего пользователя
+    /**
+     * Получить все бронирования для текущего пользователя
+     */
+
     public List<BookingDto> getAllBookings(Long idUser, String text) {
-        State state = getState(text);
+        State state = State.getStateFromText(text);
         LocalDateTime dateTime = LocalDateTime.now();
         List<Booking> booking;
         User user = checkUser(idUser);
@@ -102,9 +115,11 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    // Получить все бронирования для вещей пользователя
+    /**
+     * Получить все бронирования для вещей пользователя
+     */
     public List<BookingDto> getAllOwnerBookings(Long idUser, String text) {
-        State state = getState(text);
+        State state = State.getStateFromText(text);
         LocalDateTime dateTime = LocalDateTime.now();
         List<Booking> booking;
         checkUser(idUser);
@@ -130,25 +145,28 @@ public class BookingServiceImpl implements BookingService {
                     booking = bookingRepository.findDByItemInAndStatusOrderByStartDesc(items, Status.REJECTED);
                     break;
                 default:
-                    throw new RequestFailedException("Статус указан некорректно");
+                    throw new UnsupportedStatus("Unknown state: " + state);
             }
             return booking.stream()
                     .map(MapperBooking::toBookingDto)
                     .collect(Collectors.toList());
         } else throw new RequestFailedException("У пользователя нет ни одной вещи!");
-
     }
 
 
-    //Проверка доступности вещи для бронирования
+    /**
+     * Проверка доступности вещи для бронирования
+     */
     private void checkAvailableItem(Item item) {
         if (!item.getAvailable()) {
             throw new RequestFailedException("Данная вещь уже занята");
         }
     }
 
-    // Проверка дат бронирования.
-    // Старт не может быть позднее или одновременно с окончанием бронирования.
+    /**
+     * Проверка дат бронирования.
+     * Старт не может быть позднее или одновременно с окончанием бронирования.
+     */
     private void checkBookingDate(BookingShortDto bookingDto) {
         if (bookingDto.getStart().isAfter(bookingDto.getEnd()) ||
                 bookingDto.getStart().isEqual(bookingDto.getEnd())) {
@@ -156,25 +174,17 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    // Запрос пользователя из БД и заодно проверка, что пользователь существует.
+    /**
+     * Запрос пользователя из БД и заодно проверка, что пользователь существует.
+     */
     private User checkUser(Long idUser) {
         return userRepositoryJpa.findById(idUser)
                 .orElseThrow(() -> new MissingIdException("При запросе вещи произошла ошибка"));
     }
 
-    // Провера передаваемого статуса для запроса бронирований
-    private State getState(String text) {
-        for (State state : State.values()) {
-            if (state.toString().equals(text)) {
-                return state;
-            }
-        }
-        throw new UnsupportedStatus("Unknown state: " + text);
-    }
-
-    // Проверка, что пользователь является владельцем вещи.
-    // Мне кажется не логично и даже не соответствует ТЗ("Запрос может быть создан любым пользователем"),
-    // но в тестах владелец не может забронировать свою же вещь.
+    /**
+     * Проверка, что пользователь является владельцем вещи.
+     */
     private void checkOwner(Long idUser, Item item) {
         if (item.getOwner().equals(idUser)) {
             throw new MissingIdException("Пользователь не может бронировать свою же вещь");

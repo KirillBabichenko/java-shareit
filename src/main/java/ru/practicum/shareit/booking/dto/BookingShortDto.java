@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 public class BookingShortDto {
-        @Future
-        @NotNull
-        private LocalDateTime start;
-        @Future
-        @NotNull
-        private LocalDateTime end;
-        private Long itemId;
+    @Future
+    @NotNull
+    private LocalDateTime start;
+    @Future
+    @NotNull
+    private LocalDateTime end;
+    private Long itemId;
 }

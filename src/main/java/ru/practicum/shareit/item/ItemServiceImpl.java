@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
@@ -32,6 +33,7 @@ import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
 import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final UserService userService;
@@ -39,13 +41,19 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
-    //Добавить вещь
+    /**
+     * Добавить вещь
+     */
+    @Transactional
     public ItemDto createItem(Long userId, ItemDto itemDto) {
         Item newItem = toItem(itemDto, UserMapper.toUser(userService.getUserById(userId)));
         return toItemDto(itemRepositoryJpa.save(newItem));
     }
 
-    //Изменить созданную вещь
+    /**
+     * Изменить созданную вещь
+     */
+    @Transactional
     public ItemDto updateItem(Long idUser, Long id, ItemDto itemDto) {
         Item updateItem = itemRepositoryJpa.findById(id)
                 .orElseThrow(() -> new MissingIdException("При запросе Item произошла ошибка"));
@@ -56,7 +64,9 @@ public class ItemServiceImpl implements ItemService {
         return toItemDto(itemRepositoryJpa.save(updateItem));
     }
 
-    //Получить вещь по id
+    /**
+     * Получить вещь по id
+     */
     @Override
     public ItemDto getItemById(Long idUser, Long id) {
         Item item = itemRepositoryJpa.findById(id)
@@ -64,7 +74,9 @@ public class ItemServiceImpl implements ItemService {
         return setBookingAndCommentInfo(item, idUser);
     }
 
-    //Получить все вещи пользователя
+    /**
+     * Получить все вещи пользователя
+     */
     @Override
     public List<ItemDto> getAllUserItems(Long idUser) {
         return itemRepositoryJpa.findByOwner(idUser).stream()
@@ -73,7 +85,9 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
-    //Поиск вещи по названию или описанию
+    /**
+     * Поиск вещи по названию или описанию
+     */
     @Override
     public List<ItemDto> findItems(String text) {
         if (text.isEmpty()) {
@@ -85,7 +99,10 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    //Добавить комментарий для вещи
+    /**
+     * Добавить комментарий для вещи
+     */
+    @Transactional
     public CommentDto addComment(Long idUser, Long idItem, CommentDto commentDto) {
         Comment comment = toComment(commentDto);
         Item item = itemRepositoryJpa.findById(idItem)
@@ -102,14 +119,18 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    //Проверяем является ли айди владельцем вещи
+    /**
+     * Проверяем является ли айди владельцем вещи
+     */
     private void checkOwner(Long id, Item item) {
         if (!Objects.equals(item.getOwner(), id)) {
             throw new FailedOwnerException("Пользователь с id = " + id + " не является владельцем вещи");
         }
     }
 
-    //Добавляем в ItemDto информацию о резервировании и комментариях
+    /**
+     * Добавляем в ItemDto информацию о резервировании и комментариях
+     */
     private ItemDto setBookingAndCommentInfo(Item item, Long idUser) {
         LocalDateTime dateTime = LocalDateTime.now();
         ItemDto itemDto = toItemDto(item);
