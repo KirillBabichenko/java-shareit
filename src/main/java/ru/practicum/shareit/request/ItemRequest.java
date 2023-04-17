@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,15 +12,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-item-requests.
- */
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "REQUEST")
 public class ItemRequest {
     @Id
@@ -27,6 +27,8 @@ public class ItemRequest {
     private Long id;
     @Column(name = "description")
     private String description;
-    @Column(name = "user_id")
+    @Column(name = "created")
+    private LocalDateTime created;
+    @Column(name = "requestor_id")
     private Long requestorId;
 }

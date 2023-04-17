@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -82,30 +84,31 @@ public class BookingServiceImpl implements BookingService {
     /**
      * Получить все бронирования для текущего пользователя
      */
-
-    public List<BookingDto> getAllBookings(Long idUser, String text) {
+    public List<BookingDto> getAllBookings(Long idUser, String text, Integer from, Integer size) {
         State state = State.getStateFromText(text);
         LocalDateTime dateTime = LocalDateTime.now();
-        List<Booking> booking;
+        Page<Booking> booking;
         User user = checkUser(idUser);
+        int start = from / size;
+        PageRequest page = PageRequest.of(start, size);
         switch (state) {
             case ALL:
-                booking = bookingRepository.getAllBookingsById(idUser);
+                booking = bookingRepository.getAllBookingsById(idUser, page);
                 break;
             case CURRENT:
-                booking = bookingRepository.findDByBookerAndStartBeforeAndEndAfterOrderByStartDesc(user, dateTime, dateTime);
+                booking = bookingRepository.findDByBookerAndStartBeforeAndEndAfterOrderByStartDesc(user, dateTime, dateTime, page);
                 break;
             case FUTURE:
-                booking = bookingRepository.findDByBookerAndStartAfterOrderByStartDesc(user, dateTime);
+                booking = bookingRepository.findDByBookerAndStartAfterOrderByStartDesc(user, dateTime, page);
                 break;
             case PAST:
-                booking = bookingRepository.findDByBookerAndEndBeforeOrderByStartDesc(user, dateTime);
+                booking = bookingRepository.findDByBookerAndEndBeforeOrderByStartDesc(user, dateTime, page);
                 break;
             case WAITING:
-                booking = bookingRepository.findDByBookerAndStatusOrderByStartDesc(user, Status.WAITING);
+                booking = bookingRepository.findDByBookerAndStatusOrderByStartDesc(user, Status.WAITING, page);
                 break;
             case REJECTED:
-                booking = bookingRepository.findDByBookerAndStatusOrderByStartDesc(user, Status.REJECTED);
+                booking = bookingRepository.findDByBookerAndStatusOrderByStartDesc(user, Status.REJECTED, page);
                 break;
             default:
                 throw new RequestFailedException("Статус указан некорректно");
@@ -118,31 +121,33 @@ public class BookingServiceImpl implements BookingService {
     /**
      * Получить все бронирования для вещей пользователя
      */
-    public List<BookingDto> getAllOwnerBookings(Long idUser, String text) {
+    public List<BookingDto> getAllOwnerBookings(Long idUser, String text, Integer start, Integer size) {
         State state = State.getStateFromText(text);
         LocalDateTime dateTime = LocalDateTime.now();
-        List<Booking> booking;
+        Page<Booking> booking;
         checkUser(idUser);
+        int from = start / size;
+        PageRequest page = PageRequest.of(from, size);
         List<Item> items = itemRepositoryJpa.findByOwner(idUser);
         if (items.size() > 0) {
             switch (state) {
                 case ALL:
-                    booking = bookingRepository.findDByItemInOrderByStartDesc(items);
+                    booking = bookingRepository.findDByItemInOrderByStartDesc(items, page);
                     break;
                 case CURRENT:
-                    booking = bookingRepository.findDByItemInAndStartBeforeAndEndAfterOrderByStartDesc(items, dateTime, dateTime);
+                    booking = bookingRepository.findDByItemInAndStartBeforeAndEndAfterOrderByStartDesc(items, dateTime, dateTime, page);
                     break;
                 case FUTURE:
-                    booking = bookingRepository.findDByItemInAndStartAfterOrderByStartDesc(items, dateTime);
+                    booking = bookingRepository.findDByItemInAndStartAfterOrderByStartDesc(items, dateTime, page);
                     break;
                 case PAST:
-                    booking = bookingRepository.findDByItemInAndEndBeforeOrderByStartDesc(items, dateTime);
+                    booking = bookingRepository.findDByItemInAndEndBeforeOrderByStartDesc(items, dateTime, page);
                     break;
                 case WAITING:
-                    booking = bookingRepository.findDByItemInAndStatusOrderByStartDesc(items, Status.WAITING);
+                    booking = bookingRepository.findDByItemInAndStatusOrderByStartDesc(items, Status.WAITING, page);
                     break;
                 case REJECTED:
-                    booking = bookingRepository.findDByItemInAndStatusOrderByStartDesc(items, Status.REJECTED);
+                    booking = bookingRepository.findDByItemInAndStatusOrderByStartDesc(items, Status.REJECTED, page);
                     break;
                 default:
                     throw new UnsupportedStatus("Unknown state: " + state);
