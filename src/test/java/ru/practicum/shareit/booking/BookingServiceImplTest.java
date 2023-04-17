@@ -85,12 +85,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDtoFromDB = bookingService.createBooking(secondTestUser.getId(), bookingShortDto);
 
         assertThat(bookingDtoFromDB.getId(), notNullValue());
-        assertThat(bookingDtoFromDB.getStart(), equalTo(bookingShortDto.getStart()));
-        assertThat(bookingDtoFromDB.getEnd(), equalTo(bookingShortDto.getEnd()));
-        assertThat(bookingDtoFromDB.getStatus(), equalTo(Status.WAITING));
-        assertThat(bookingDtoFromDB.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(bookingDtoFromDB.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(bookingDtoFromDB.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(bookingDtoFromDB, bookingShortDto, secondTestUser, itemDtoFromDB, Status.WAITING);
     }
 
     @Test
@@ -98,13 +93,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDtoFromDB = bookingService.createBooking(secondTestUser.getId(), bookingShortDto);
         BookingDto approveBooking = bookingService.approveBooking(testUser.getId(), bookingDtoFromDB.getId(), true);
 
-        assertThat(approveBooking.getId(), notNullValue());
-        assertThat(approveBooking.getStart(), equalTo(bookingShortDto.getStart()));
-        assertThat(approveBooking.getEnd(), equalTo(bookingShortDto.getEnd()));
-        assertThat(approveBooking.getStatus(), equalTo(Status.APPROVED));
-        assertThat(approveBooking.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(approveBooking.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(approveBooking.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(approveBooking, bookingShortDto, secondTestUser, itemDtoFromDB, Status.APPROVED);
     }
 
 
@@ -114,13 +103,7 @@ public class BookingServiceImplTest {
         BookingDto approveBooking = bookingService.approveBooking(testUser.getId(), bookingDtoFromDB.getId(), true);
         BookingDto bookingById = bookingService.getBookingById(testUser.getId(), approveBooking.getId());
 
-        assertThat(bookingById.getId(), notNullValue());
-        assertThat(bookingById.getStart(), equalTo(bookingShortDto.getStart()));
-        assertThat(bookingById.getEnd(), equalTo(bookingShortDto.getEnd()));
-        assertThat(bookingById.getStatus(), equalTo(Status.APPROVED));
-        assertThat(bookingById.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(bookingById.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(bookingById.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(bookingById, bookingShortDto, secondTestUser, itemDtoFromDB, Status.APPROVED);
 
         final MissingIdException exception = Assertions.assertThrows(MissingIdException.class,
                 () -> bookingService.getBookingById(999L, approveBooking.getId()));
@@ -149,10 +132,7 @@ public class BookingServiceImplTest {
 
         assertThat(approvedBookings.size(), equalTo(1));
         assertThat(waitingBooking.getId(), equalTo(secondBooking.getId()));
-        assertThat(waitingBooking.getStatus(), equalTo(Status.WAITING));
-        assertThat(waitingBooking.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(waitingBooking.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(waitingBooking.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(waitingBooking, secondBookingShortDto, secondTestUser, itemDtoFromDB, Status.WAITING);
     }
 
     @Test
@@ -177,10 +157,7 @@ public class BookingServiceImplTest {
 
         assertThat(approvedBookings.size(), equalTo(1));
         assertThat(waitingBooking.getId(), equalTo(secondBooking.getId()));
-        assertThat(waitingBooking.getStatus(), equalTo(Status.WAITING));
-        assertThat(waitingBooking.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(waitingBooking.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(waitingBooking.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(waitingBooking, secondBookingShortDto, secondTestUser, itemDtoFromDB, Status.WAITING);
     }
 
     @Test
@@ -221,11 +198,7 @@ public class BookingServiceImplTest {
         BookingDto rejectedBooking = rejectedBookings.get(0);
 
         assertThat(rejectedBookings.size(), equalTo(1));
-        assertThat(rejectedBooking.getId(), equalTo(firstBooking.getId()));
-        assertThat(rejectedBooking.getStatus(), equalTo(Status.REJECTED));
-        assertThat(rejectedBooking.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(rejectedBooking.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(rejectedBooking.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(rejectedBooking, bookingShortDto, secondTestUser, itemDtoFromDB, Status.REJECTED);
     }
 
     @Test
@@ -243,11 +216,7 @@ public class BookingServiceImplTest {
         BookingDto currentBooking = currentBookings.get(0);
 
         assertThat(currentBookings.size(), equalTo(bookingDtos.size()));
-        assertThat(currentBooking.getId(), equalTo(firstBooking.getId()));
-        assertThat(currentBooking.getStatus(), equalTo(Status.APPROVED));
-        assertThat(currentBooking.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(currentBooking.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(currentBooking.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(currentBooking, bookingDto, secondTestUser, itemDtoFromDB, Status.APPROVED);
     }
 
     @Test
@@ -265,10 +234,7 @@ public class BookingServiceImplTest {
 
         assertThat(futureBookings.size(), equalTo(bookingDtos.size()));
         assertThat(futureBooking.getId(), equalTo(firstBooking.getId()));
-        assertThat(futureBooking.getStatus(), equalTo(Status.WAITING));
-        assertThat(futureBooking.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(futureBooking.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(futureBooking.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(futureBooking, bookingDto, secondTestUser, itemDtoFromDB, Status.WAITING);
     }
 
     @Test
@@ -287,10 +253,7 @@ public class BookingServiceImplTest {
 
         assertThat(pastBookings.size(), equalTo(bookingDtos.size()));
         assertThat(pastBooking.getId(), equalTo(firstBooking.getId()));
-        assertThat(pastBooking.getStatus(), equalTo(Status.APPROVED));
-        assertThat(pastBooking.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(pastBooking.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(pastBooking.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(pastBooking, bookingDto, secondTestUser, itemDtoFromDB, Status.APPROVED);
     }
 
     @Test
@@ -309,10 +272,7 @@ public class BookingServiceImplTest {
 
         assertThat(currentBookings.size(), equalTo(bookingDtos.size()));
         assertThat(currentBooking.getId(), equalTo(firstBooking.getId()));
-        assertThat(currentBooking.getStatus(), equalTo(Status.APPROVED));
-        assertThat(currentBooking.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(currentBooking.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(currentBooking.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(currentBooking, bookingDto, secondTestUser, itemDtoFromDB, Status.APPROVED);
     }
 
     @Test
@@ -331,10 +291,7 @@ public class BookingServiceImplTest {
 
         assertThat(futureBookings.size(), equalTo(bookingDtos.size()));
         assertThat(futureBooking.getId(), equalTo(firstBooking.getId()));
-        assertThat(futureBooking.getStatus(), equalTo(Status.APPROVED));
-        assertThat(futureBooking.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(futureBooking.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(futureBooking.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(futureBooking, bookingDto, secondTestUser, itemDtoFromDB, Status.APPROVED);
     }
 
     @Test
@@ -353,10 +310,7 @@ public class BookingServiceImplTest {
 
         assertThat(pastBookings.size(), equalTo(bookingDtos.size()));
         assertThat(pastBooking.getId(), equalTo(firstBooking.getId()));
-        assertThat(pastBooking.getStatus(), equalTo(Status.APPROVED));
-        assertThat(pastBooking.getBooker().getId(), equalTo(secondTestUser.getId()));
-        assertThat(pastBooking.getItem().getId(), equalTo(itemDtoFromDB.getId()));
-        assertThat(pastBooking.getItem().getName(), equalTo(itemDtoFromDB.getName()));
+        checkBookingsAreTheSame(pastBooking, bookingDto, secondTestUser, itemDtoFromDB, Status.APPROVED);
     }
 
     @Test
@@ -377,5 +331,16 @@ public class BookingServiceImplTest {
         final RequestFailedException exception = Assertions.assertThrows(RequestFailedException.class,
                 () -> bookingService.createBooking(secondTestUser.getId(), bookingDto));
         Assertions.assertEquals("Ошибка со временем бронирования", exception.getMessage());
+    }
+
+    private void checkBookingsAreTheSame(
+            BookingDto booking, BookingShortDto secondBooking, UserDto user, ItemDto item, Status status) {
+        assertThat(booking.getId(), notNullValue());
+        assertThat(booking.getStatus(), equalTo(status));
+        assertThat(booking.getStart(), equalTo(secondBooking.getStart()));
+        assertThat(booking.getEnd(), equalTo(secondBooking.getEnd()));
+        assertThat(booking.getBooker().getId(), equalTo(user.getId()));
+        assertThat(booking.getItem().getId(), equalTo(item.getId()));
+        assertThat(booking.getItem().getName(), equalTo(item.getName()));
     }
 }

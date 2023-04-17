@@ -47,7 +47,6 @@ public class ItemServiceImplTest {
     private UserDto testUser;
     private UserDto secondUserFromDB;
 
-
     @BeforeEach
     public void setUp() {
         itemDto = ItemDto.builder()
@@ -80,11 +79,9 @@ public class ItemServiceImplTest {
     void createItemTest() {
         ItemDto itemDtoFromDB = itemService.createItem(testUser.getId(), itemDto);
 
-        assertThat(itemDtoFromDB.getId(), notNullValue());
-        assertThat(itemDtoFromDB.getName(), equalTo(itemDto.getName()));
-        assertThat(itemDtoFromDB.getDescription(), equalTo(itemDto.getDescription()));
-        assertThat(itemDtoFromDB.getAvailable(), equalTo(itemDto.getAvailable()));
+        checkItemsAreTheSame(itemDtoFromDB, itemDto);
     }
+
 
     @Test
     void updateItemTest() {
@@ -92,10 +89,7 @@ public class ItemServiceImplTest {
 
         ItemDto updateItemFromDB = itemService.updateItem(testUser.getId(), itemDtoFromDB.getId(), updateItemDto);
 
-        assertThat(updateItemFromDB.getId(), notNullValue());
-        assertThat(updateItemFromDB.getName(), equalTo(updateItemDto.getName()));
-        assertThat(updateItemFromDB.getDescription(), equalTo(updateItemDto.getDescription()));
-        assertThat(updateItemFromDB.getAvailable(), equalTo(updateItemDto.getAvailable()));
+        checkItemsAreTheSame(updateItemFromDB, updateItemDto);
     }
 
     @Test
@@ -104,10 +98,7 @@ public class ItemServiceImplTest {
 
         ItemDto itemByIdFromDB = itemService.getItemById(testUser.getId(), itemDtoFromDB.getId());
 
-        assertThat(itemByIdFromDB.getId(), notNullValue());
-        assertThat(itemByIdFromDB.getName(), equalTo(itemDto.getName()));
-        assertThat(itemByIdFromDB.getDescription(), equalTo(itemDto.getDescription()));
-        assertThat(itemByIdFromDB.getAvailable(), equalTo(itemDto.getAvailable()));
+        checkItemsAreTheSame(itemByIdFromDB, itemDto);
     }
 
 
@@ -141,10 +132,7 @@ public class ItemServiceImplTest {
         List<ItemDto> itemsFromSearch = itemService.findItems(textSearch, 0, 3);
 
         assertThat(itemsFromSearch.size(), equalTo(1));
-        assertThat(itemsFromSearch.get(0).getId(), notNullValue());
-        assertThat(itemsFromSearch.get(0).getName(), equalTo(updateItemDto.getName()));
-        assertThat(itemsFromSearch.get(0).getDescription(), equalTo(updateItemDto.getDescription()));
-        assertThat(itemsFromSearch.get(0).getAvailable(), equalTo(updateItemDto.getAvailable()));
+        checkItemsAreTheSame(itemsFromSearch.get(0), updateItemDto);
     }
 
     @Test
@@ -202,6 +190,13 @@ public class ItemServiceImplTest {
                 () -> itemService.updateItem(secondUserFromDB.getId(), itemDtoFromDB.getId(), updateItemDto));
         Assertions.assertEquals("Пользователь с id = " + secondUserFromDB.getId() +
                 " не является владельцем вещи", exception.getMessage());
+    }
+
+    private void checkItemsAreTheSame(ItemDto itemDto, ItemDto secondItemDto) {
+        assertThat(itemDto.getId(), notNullValue());
+        assertThat(itemDto.getName(), equalTo(secondItemDto.getName()));
+        assertThat(itemDto.getDescription(), equalTo(secondItemDto.getDescription()));
+        assertThat(itemDto.getAvailable(), equalTo(secondItemDto.getAvailable()));
     }
 
 }

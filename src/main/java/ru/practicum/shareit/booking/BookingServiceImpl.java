@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getAllBookings(Long idUser, String text, Integer from, Integer size) {
         State state = State.getStateFromText(text);
         LocalDateTime dateTime = LocalDateTime.now();
-        Page<Booking> booking;
+        List<Booking> booking;
         User user = checkUser(idUser);
         int start = from / size;
         PageRequest page = PageRequest.of(start, size);
@@ -124,7 +123,7 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getAllOwnerBookings(Long idUser, String text, Integer start, Integer size) {
         State state = State.getStateFromText(text);
         LocalDateTime dateTime = LocalDateTime.now();
-        Page<Booking> booking;
+        List<Booking> booking;
         checkUser(idUser);
         int from = start / size;
         PageRequest page = PageRequest.of(from, size);

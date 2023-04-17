@@ -6,10 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.item.model.Item;
+
+import java.util.List;
 
 @DataJpaTest
 public class ItemRepositoryTest {
@@ -46,15 +47,12 @@ public class ItemRepositoryTest {
         Pageable pageable = PageRequest.of(0, 2);
         itemRepositoryJpa.save(item);
 
-        Page<Item> pageItems = itemRepositoryJpa.search(searchText, pageable);
-        Item itemFromDB = pageItems.getContent().get(0);
+        List<Item> pageItems = itemRepositoryJpa.search(searchText, pageable);
+        Item itemFromDB = pageItems.get(0);
 
         Assertions.assertNotNull(pageItems);
-        Assertions.assertEquals(1, pageItems.getTotalPages());
-        Assertions.assertEquals(1, pageItems.getTotalElements());
         Assertions.assertEquals(item.getName(), itemFromDB.getName());
         Assertions.assertEquals(item.getDescription(), itemFromDB.getDescription());
         Assertions.assertEquals(item.getAvailable(), itemFromDB.getAvailable());
     }
-
 }

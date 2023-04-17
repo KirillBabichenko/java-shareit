@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.notNullValue;
+import static ru.practicum.shareit.user.dto.UserMapper.toUser;
 
 @Transactional
 @SpringBootTest(
@@ -58,11 +59,8 @@ public class UserServiceImplTest {
         User testUser = query.setParameter("email", userDto.getEmail())
                 .getSingleResult();
 
-        assertThat(testUser.getId(), equalTo(1L));
-        assertThat(testUser.getName(), equalTo(userDto.getName()));
-        assertThat(testUser.getEmail(), equalTo(userDto.getEmail()));
+        checkUsersAreTheSame(testUser, userDto, 1L);
     }
-
 
     @Test
     void updateUserTest() {
@@ -77,9 +75,7 @@ public class UserServiceImplTest {
         User testUser = query.setParameter("email", updateUser.getEmail())
                 .getSingleResult();
 
-        assertThat(testUser.getId(), equalTo(1L));
-        assertThat(testUser.getName(), equalTo(updateUser.getName()));
-        assertThat(testUser.getEmail(), equalTo(updateUser.getEmail()));
+        checkUsersAreTheSame(testUser, updateUser, 1L);
     }
 
     @Test
@@ -87,9 +83,7 @@ public class UserServiceImplTest {
         UserDto testUser = userService.createUser(userDto);
         UserDto userFromDB = userService.getUserById(testUser.getId());
 
-        assertThat(userFromDB.getId(), equalTo(1L));
-        assertThat(userFromDB.getName(), equalTo(userDto.getName()));
-        assertThat(userFromDB.getEmail(), equalTo(userDto.getEmail()));
+        checkUsersAreTheSame(toUser(userFromDB), userDto, 1L);
     }
 
     @Test
@@ -132,6 +126,12 @@ public class UserServiceImplTest {
                 .build();
 
         Assertions.assertThrows(ConstraintViolationException.class, () -> userService.createUser(userDtoBadEmail));
+    }
+
+    private void checkUsersAreTheSame(User user, UserDto userDto, Long id) {
+        assertThat(user.getId(), equalTo(id));
+        assertThat(user.getName(), equalTo(userDto.getName()));
+        assertThat(user.getEmail(), equalTo(userDto.getEmail()));
     }
 }
 

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.item.ItemRepositoryJpa;
@@ -74,17 +73,11 @@ public class BookingRepositoryTest {
         itemRepositoryJpa.save(item);
         bookingRepository.save(booking);
 
-        Page<Booking> pageBookings = bookingRepository.getAllBookingsById(userFromDB.getId(), pageable);
-        Booking bookingFromDB = pageBookings.getContent().get(0);
+        List<Booking> pageBookings = bookingRepository.getAllBookingsById(userFromDB.getId(), pageable);
+        Booking bookingFromDB = pageBookings.get(0);
 
         Assertions.assertNotNull(pageBookings);
-        Assertions.assertEquals(1, pageBookings.getTotalPages());
-        Assertions.assertEquals(1, pageBookings.getTotalElements());
-        Assertions.assertEquals(booking.getStart(), bookingFromDB.getStart());
-        Assertions.assertEquals(booking.getEnd(), bookingFromDB.getEnd());
-        Assertions.assertEquals(booking.getItem(), bookingFromDB.getItem());
-        Assertions.assertEquals(booking.getBooker(), bookingFromDB.getBooker());
-        Assertions.assertEquals(booking.getStatus(), bookingFromDB.getStatus());
+        checkBookingAreTheSame(booking, bookingFromDB);
     }
 
     @Test
@@ -99,11 +92,14 @@ public class BookingRepositoryTest {
 
         Assertions.assertNotNull(listBookings);
         Assertions.assertEquals(1, listBookings.size());
-        Assertions.assertEquals(booking.getStart(), bookingFromDB.getStart());
-        Assertions.assertEquals(booking.getEnd(), bookingFromDB.getEnd());
-        Assertions.assertEquals(booking.getItem(), bookingFromDB.getItem());
-        Assertions.assertEquals(booking.getBooker(), bookingFromDB.getBooker());
-        Assertions.assertEquals(booking.getStatus(), bookingFromDB.getStatus());
+        checkBookingAreTheSame(booking, bookingFromDB);
     }
 
+    private void checkBookingAreTheSame(Booking booking, Booking secondBooking) {
+        Assertions.assertEquals(booking.getStart(), secondBooking.getStart());
+        Assertions.assertEquals(booking.getEnd(), secondBooking.getEnd());
+        Assertions.assertEquals(booking.getItem(), secondBooking.getItem());
+        Assertions.assertEquals(booking.getBooker(), secondBooking.getBooker());
+        Assertions.assertEquals(booking.getStatus(), secondBooking.getStatus());
+    }
 }
