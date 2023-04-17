@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.user.Variables.ID_SHARER;
 
 @WebMvcTest(controllers = ItemRequestController.class)
 public class ItemRequestControllerTest {
@@ -62,7 +63,7 @@ public class ItemRequestControllerTest {
 
         mvc.perform(post("/requests")
                         .content(mapper.writeValueAsString(itemRequestDto))
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -79,7 +80,7 @@ public class ItemRequestControllerTest {
                 .thenReturn(itemRequestDto);
 
         mvc.perform(get("/requests/1")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(itemRequestDto.getId()), Long.class))
@@ -94,7 +95,7 @@ public class ItemRequestControllerTest {
                 .thenReturn(requests);
 
         mvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[1].id", is(secondRequestDto.getId()), Long.class))
@@ -109,7 +110,7 @@ public class ItemRequestControllerTest {
                 .thenReturn(requests);
 
         mvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[1].id", is(secondRequestDto.getId()), Long.class))

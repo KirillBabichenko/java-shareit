@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.user.Variables.ID_SHARER;
 
 @WebMvcTest(controllers = BookingController.class)
 public class BookingControllerTest {
@@ -75,7 +76,7 @@ public class BookingControllerTest {
 
         mvc.perform(post("/bookings")
                         .content(mapper.writeValueAsString(bookingDto))
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -96,7 +97,7 @@ public class BookingControllerTest {
 
         mvc.perform(patch("/bookings/1?approved=true")
                         .content(mapper.writeValueAsString(bookingDto))
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -115,7 +116,7 @@ public class BookingControllerTest {
                 .thenReturn(bookingDto);
 
         mvc.perform(get("/bookings/1")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingDto.getId()), Long.class))
@@ -132,7 +133,7 @@ public class BookingControllerTest {
                 .thenReturn(bookings);
 
         mvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(bookingDto.getId()), Long.class))
@@ -150,7 +151,7 @@ public class BookingControllerTest {
                 .thenReturn(bookings);
 
         mvc.perform(get("/bookings/owner")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(bookingDto.getId()), Long.class))

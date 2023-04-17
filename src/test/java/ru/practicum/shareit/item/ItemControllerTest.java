@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.user.Variables.ID_SHARER;
 
 @WebMvcTest(controllers = ItemController.class)
 public class ItemControllerTest {
@@ -58,7 +59,7 @@ public class ItemControllerTest {
 
         mvc.perform(post("/items")
                         .content(mapper.writeValueAsString(itemDto))
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -77,7 +78,7 @@ public class ItemControllerTest {
 
         mvc.perform(patch("/items/1")
                         .content(mapper.writeValueAsString(itemDto))
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -94,7 +95,7 @@ public class ItemControllerTest {
                 .thenReturn(itemDto);
 
         mvc.perform(get("/items/1")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(itemDto.getId()), Long.class))
@@ -109,7 +110,7 @@ public class ItemControllerTest {
                 .thenReturn(items);
 
         mvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(itemDto.getId()), Long.class))
@@ -124,7 +125,7 @@ public class ItemControllerTest {
                 .thenReturn(items);
 
         mvc.perform(get("/items/search?text=дРелЬ")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(itemDto.getId()), Long.class))
@@ -146,7 +147,7 @@ public class ItemControllerTest {
 
         mvc.perform(post("/items/1/comment")
                         .content(mapper.writeValueAsString(comment))
-                        .header("X-Sharer-User-Id", 1)
+                        .header(ID_SHARER, 1)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
