@@ -14,6 +14,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.exception.FailedOwnerException;
 import ru.practicum.shareit.exception.MissingIdException;
+import ru.practicum.shareit.exception.RequestFailedException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.UserService;
@@ -173,6 +174,24 @@ public class ItemServiceImplTest {
         final MissingIdException exception = Assertions.assertThrows(MissingIdException.class,
                 () -> bookingService.createBooking(testUser.getId(), bookingShortDto));
         Assertions.assertEquals("Пользователь не может бронировать свою же вещь", exception.getMessage());
+    }
+
+    @Test
+    void addCommentExceptionTest() {
+        CommentDto comment = CommentDto.builder()
+                .text("Добавляем комментарий")
+                .build();
+        ItemDto itemDtoFromDB = itemService.createItem(testUser.getId(), itemDto);
+        BookingShortDto bookingShortDto = BookingShortDto.builder()
+                .start(LocalDateTime.now().plusNanos(1))
+                .end(LocalDateTime.now().plusNanos(2))
+                .itemId(itemDtoFromDB.getId())
+                .build();
+        bookingService.createBooking(secondUserFromDB.getId(), bookingShortDto);
+
+        final RequestFailedException exception = Assertions.assertThrows(RequestFailedException.class,
+                () -> itemService.addComment(secondUserFromDB.getId(), itemDtoFromDB.getId(), comment));
+        Assertions.assertEquals("Не выполнены условия для добавления комментария", exception.getMessage());
     }
 
     @Test

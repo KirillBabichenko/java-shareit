@@ -184,6 +184,15 @@ public class BookingServiceImplTest {
     }
 
     @Test
+    void approveBookingWrongOwnerTest() {
+        BookingDto bookingDtoFromDB = bookingService.createBooking(secondTestUser.getId(), bookingShortDto);
+
+        final MissingIdException exception = Assertions.assertThrows(MissingIdException.class,
+                () -> bookingService.approveBooking(secondTestUser.getId(), bookingDtoFromDB.getId(), true));
+        Assertions.assertEquals("ID пользователя не совпадает с ID владельца вещи", exception.getMessage());
+    }
+
+    @Test
     void approveBookingTwiceErrorTest() {
         BookingDto bookingDtoFromDB = bookingService.createBooking(secondTestUser.getId(), bookingShortDto);
         bookingService.approveBooking(testUser.getId(), bookingDtoFromDB.getId(), true);
@@ -201,5 +210,22 @@ public class BookingServiceImplTest {
         final UnsupportedStatus exception = Assertions.assertThrows(UnsupportedStatus.class,
                 () -> bookingService.getAllBookings(secondTestUser.getId(), nonExistentState, 0, 3));
         Assertions.assertEquals("Unknown state: " + nonExistentState, exception.getMessage());
+    }
+
+    @Test
+    void getAllBookingsRejectedStateTest() {
+        List<BookingShortDto> bookingDtos = List.of(bookingShortDto, secondBookingShortDto);
+        BookingDto firstBooking = bookingService.createBooking(secondTestUser.getId(), bookingShortDto);
+        bookingService.approveBooking(testUser.getId(), firstBooking.getId(), false);
+
+        List<BookingDto> rejectedBookings = bookingService.getAllBookings(secondTestUser.getId(), "REJECTED", 0, 3);
+        BookingDto rejectedBooking = rejectedBookings.get(0);
+
+        assertThat(rejectedBookings.size(), equalTo(1));
+        assertThat(rejectedBooking.getId(), equalTo(firstBooking.getId()));
+        assertThat(rejectedBooking.getStatus(), equalTo(Status.REJECTED));
+        assertThat(rejectedBooking.getBooker().getId(), equalTo(secondTestUser.getId()));
+        assertThat(rejectedBooking.getItem().getId(), equalTo(itemDtoFromDB.getId()));
+        assertThat(rejectedBooking.getItem().getName(), equalTo(itemDtoFromDB.getName()));
     }
 }
