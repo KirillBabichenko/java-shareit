@@ -71,5 +71,4 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
         repositoryJpa.deleteById(id);
     }
-
 }
