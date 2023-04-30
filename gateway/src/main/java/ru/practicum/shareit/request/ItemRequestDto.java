@@ -3,7 +3,7 @@ package ru.practicum.shareit.request;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.ItemDto;
 
 import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
@@ -18,5 +18,5 @@ public class ItemRequestDto {
     private String description;
     private LocalDateTime created;
     private Long requestorId;
-    private List<Item> items;
+    private List<ItemDto> items;
 }
